@@ -1,4 +1,4 @@
-﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shine Payroll</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shine Payroll</title>
 <style>
   :root{
     --bg:#0b1220;--card:#141d2e;--card2:#1b2740;--ink:#e7ecf3;--mut:#8a98ad;
@@ -70,7 +70,7 @@
 
 <div class="wrap">
   <div class="top">
-    <h1>Shine Property Services 窶・Payroll</h1>
+    <h1>Shine Property Services — Payroll</h1>
     <span class="badge sample" id="srcBadge">Sample data</span>
   </div>
 
@@ -90,7 +90,9 @@
       <option value="Victoria">Victoria</option>
       <option value="Prince George">Prince George</option>
     </select>
-    <button class="btn" id="exportPeriod" style="margin-left:6px">筮・Export period CSV</button>
+    <button class="btn" id="exportPeriod" style="margin-left:6px">⬇ Export period CSV</button>
+    <button class="btn hidden" id="syncNow" style="margin-left:6px">↻ Sync now</button>
+    <span id="syncMsg" class="src" style="margin-left:6px"></span>
   </div>
   <div class="meta" id="meta"></div>
 
@@ -116,9 +118,11 @@
 (async function(){
   var p = new URLSearchParams(location.search);
   var key = p.get('key'); if(!key){ key = prompt('Enter payroll passcode'); }
+  window.__PAYROLL_API = 'https://fxutwkandrlmtdjvydal.functions.supabase.co/payroll-board';
+  window.__PAYROLL_KEY = key;
   var msg = document.getElementById('boot-msg');
   try {
-    var r = await fetch('https://fxutwkandrlmtdjvydal.functions.supabase.co/payroll-board?format=json&key=' + encodeURIComponent(key||''));
+    var r = await fetch(window.__PAYROLL_API + '?format=json&key=' + encodeURIComponent(key||''));
     if(!r.ok){ if(msg) msg.textContent = (r.status===401 ? 'Wrong passcode.' : 'Could not load data ('+r.status+').'); return; }
     window.SHINE_DATA = await r.json();
   } catch(e){ if(msg) msg.textContent = 'Could not reach the data service: ' + e; return; }
@@ -293,7 +297,7 @@ function linesFor(name, p){
       if(!inPeriod(j.closed,p) || !j.techs.includes(name)) return;
       const n = j.techs.length, base = j.value/n, computed = base*rate, id = 'job:'+idx+':'+name;
       const adj = getAdj(p.payday,id);
-      out.push({ id, base, desc:'Job '+fmt(parse(j.closed))+' ﾂｷ '+money(j.value)+(n>1?(' ﾂｷ split '+n+' ways'):'')+' ﾂｷ '+(rate*100)+'%',
+      out.push({ id, base, desc:'Job '+fmt(parse(j.closed))+' · '+money(j.value)+(n>1?(' · split '+n+' ways'):''),
         computed, amount: adj===null?computed:adj, adjusted: adj!==null });
     });
   } else {
@@ -302,7 +306,7 @@ function linesFor(name, p){
       const self = isSelfGen(q.leadSource), rate = self?SALES_RATE_SELFGEN:SALES_RATE;
       const computed = q.value*rate, id = 'quote:'+idx;
       const adj = getAdj(p.payday,id);
-      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(q.approved))+' ﾂｷ '+money(q.value)+' ﾂｷ '+(self?'self-gen 20%':'10%'), src:q.leadSource,
+      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(q.approved))+' · '+money(q.value)+(self?' · self-gen':''), src:q.leadSource,
         computed, amount: adj===null?computed:adj, adjusted: adj!==null });
     });
   }
@@ -318,7 +322,7 @@ function tipLinesFor(name, p){
     if(!inPeriod(t.paidDate,p) || !(t.techs||[]).includes(name)) return;
     const n=t.techs.length, computed=t.amount/n, id='tip:'+idx+':'+name;
     const adj=getAdj(p.payday,id);
-    out.push({ id, base:t.amount/n, desc:'Tip ﾂｷ invoice paid '+fmt(parse(t.paidDate))+' ﾂｷ '+money(t.amount)+(n>1?(' ﾂｷ split '+n+' ways'):''),
+    out.push({ id, base:t.amount/n, desc:'Tip · invoice paid '+fmt(parse(t.paidDate))+' · '+money(t.amount)+(n>1?(' · split '+n+' ways'):''),
       computed, amount: adj===null?computed:adj, adjusted: adj!==null });
   });
   return out;
@@ -349,13 +353,13 @@ let currentPage = 'dashboard';
 // ===== renderers =====
 function renderBadge(){
   const b = $('#srcBadge');
-  if (DATA.source==='live'){ b.className='badge live'; b.textContent='Live from Jobber'+(DATA.syncedAt?(' ﾂｷ synced '+DATA.syncedAt):''); }
-  else if (DATA.source==='import'){ b.className='badge live'; b.textContent='Imported ﾂｷ '+DATA.jobs.length+' jobs, '+DATA.quotes.length+' quotes'; }
+  if (DATA.source==='live'){ b.className='badge live'; b.textContent='Live from Jobber'+(DATA.syncedAt?(' · synced '+DATA.syncedAt):''); }
+  else if (DATA.source==='import'){ b.className='badge live'; b.textContent='Imported · '+DATA.jobs.length+' jobs, '+DATA.quotes.length+' quotes'; }
   else { b.className='badge sample'; b.textContent='Sample data'; }
 }
 function renderMeta(){
   const p = curPeriod(), avail = p.payday<=TODAY;
-  $('#meta').innerHTML = 'Pay period <b>'+fmt(p.start)+' 窶・'+fmt(p.end)+'</b> ﾂｷ Payday <b>'+fmt(p.payday)+'</b>'+
+  $('#meta').innerHTML = 'Pay period <b>'+fmt(p.start)+' – '+fmt(p.end)+'</b> · Payday <b>'+fmt(p.payday)+'</b>'+
     (avail?'<span class="pill ok">Report available</span>':'<span class="pill up">Upcoming</span>');
 }
 function renderDashboard(){
@@ -400,8 +404,8 @@ function roleTable(role){
     const rows = ROSTER[role].filter(x=>x.location===L).map(x=>summary(x.name,p));
     let sub=0, subH=0, subTip=0;
     const isTech = role==='tech';
-    const cap = isTech ? (L+' technicians ﾂｷ '+(TECH_RATE[L]*100)+'% of job value')
-                       : (L+' sales ﾂｷ 10% per quote, 20% self-generated');
+    const cap = isTech ? (L+' technicians · '+(TECH_RATE[L]*100)+'% of job value')
+                       : (L+' sales · 10% per quote, 20% self-generated');
     html += '<div class="secthead"><h3>'+cap+'</h3></div>';
     html += '<table><thead><tr><th>'+(isTech?'Technician':'Salesperson')+'</th><th>'+(isTech?'Jobs':'Quotes')+'</th><th>Hours</th><th>Commission</th>'+(isTech?'<th>Tips</th>':'')+'<th>Bonus</th><th>Total</th><th></th></tr></thead><tbody>';
     rows.forEach(r=>{ sub+=r.total; subH+=r.hours; subTip+=r.tips;
@@ -420,17 +424,17 @@ function renderDetail(name){
   const mkRow = l => '<tr><td>'+l.desc+(l.src?'<div class="src">Lead source: '+l.src+'</div>':'')+'</td>'+
     '<td>'+money(l.computed)+'</td>'+
     '<td><input type="number" step="10" value="'+(Math.round(l.amount*100)/100)+'" data-adj="'+l.id+'"'+(lk?' disabled':'')+'>'+
-    (l.adjusted&&!lk?' <button class="reset" title="Reset to calculated" data-reset="'+l.id+'">竊ｺ</button>':'')+'</td></tr>';
-  let rows = (s.lines.map(mkRow).join('') + s.tipLines.map(mkRow).join('')) || '<tr><td colspan="3" style="color:var(--mut)">No jobs/quotes in this period.</td></tr>';
+    (l.adjusted&&!lk?' <button class="reset" title="Reset to calculated" data-reset="'+l.id+'">↺</button>':'')+'</td></tr>';
+  let rows = s.lines.map(mkRow).join('');
+  if (s.tips>0) rows += '<tr><td>Tips ('+s.tipLines.length+')</td><td>'+money(s.tips)+'</td><td style="text-align:right">'+money(s.tips)+'</td></tr>';
+  if (!rows) rows = '<tr><td colspan="3" style="color:var(--mut)">No jobs/quotes in this period.</td></tr>';
   $('#page-detail').innerHTML =
-    '<div class="detail-head"><button class="lnk" id="backBtn">竊・Back</button>'+
-    '<h2>'+name+'</h2><span class="mk">'+s.location+'</span><span class="src">'+(s.role==='tech'?'Technician':'Sales')+' ﾂｷ '+memberOf(name).email+' ﾂｷ '+fmt(p.start)+' 窶・'+fmt(p.end)+' ﾂｷ payday '+fmt(p.payday)+(lk?' ﾂｷ approved/locked':'')+'</span></div>'+
-    '<table><thead><tr><th>Line item</th><th>Calculated</th><th>Adjusted</th></tr></thead><tbody>'+rows+'</tbody>'+
+    '<div class="detail-head"><button class="lnk" id="backBtn">← Back</button>'+
+    '<h2>'+name+'</h2><span class="mk">'+s.location+'</span><span class="src">'+(s.role==='tech'?'Technician':'Sales')+' · '+memberOf(name).email+' · '+fmt(p.start)+' – '+fmt(p.end)+' · payday '+fmt(p.payday)+(lk?' · approved/locked':'')+'</span></div>'+
+    '<table><thead><tr><th>Line item</th><th>Commission</th><th>Adjusted</th></tr></thead><tbody>'+rows+'</tbody>'+
     '<tfoot>'+
     '<tr><td>Hours worked</td><td></td><td style="text-align:right">'+fmtH(s.hours)+'</td></tr>'+
     '<tr><td>'+revLabel+'</td><td></td><td style="text-align:right">'+money(s.revenue)+'</td></tr>'+
-    '<tr><td>Commission</td><td></td><td style="text-align:right">'+money(s.commission)+'</td></tr>'+
-    (s.tipLines.length?'<tr><td>Tips</td><td></td><td style="text-align:right">'+money(s.tips)+'</td></tr>':'')+
     '<tr><td>Bonus</td><td></td><td style="text-align:right"><input type="number" min="0" step="50" value="'+s.bonus+'" data-bonus="'+name+'"'+(lk?' disabled':'')+'></td></tr>'+
     '<tr><td>Total pay</td><td></td><td style="text-align:right">'+money(s.total)+'</td></tr></tfoot></table>'+
     '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+
@@ -441,8 +445,8 @@ function renderApprove(){
   if (isApproved(pd)){
     const when = new Date(approvedAt(pd)).toLocaleString('en-CA');
     $('#approveBar').innerHTML =
-      '<div class="panel" style="border-color:var(--good)"><b style="color:var(--good)">笨・Payroll approved</b> for payday '+fmt(pd)+
-      ' &middot; <span class="src">approved '+when+' 窶・bonuses &amp; adjustments are locked</span>'+
+      '<div class="panel" style="border-color:var(--good)"><b style="color:var(--good)">✓ Payroll approved</b> for payday '+fmt(pd)+
+      ' &middot; <span class="src">approved '+when+' — bonuses &amp; adjustments are locked</span>'+
       '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'+
       '<button class="btn" id="revokeBtn">Revoke / unlock</button></div></div>';
   } else {
@@ -452,7 +456,7 @@ function renderApprove(){
   }
 }
 function renderRules(){
-  $('#rules').innerHTML = 'Pay rules 窶・Technicians: <b>20%</b> (Victoria) / <b>17.5%</b> (Prince George) of total job revenue, by scheduled date; '+
+  $('#rules').innerHTML = 'Pay rules — Technicians: <b>20%</b> (Victoria) / <b>17.5%</b> (Prince George) of total job revenue, by scheduled date; '+
     'jobs with 2+ assigned techs split evenly. Sales: <b>10%</b> per approved quote (by approved date), <b>20%</b> when Lead Source is self-gen / door knock. '+
     'Any line item can be hand-adjusted; bonuses add to the total.';
 }
@@ -487,12 +491,12 @@ function renderData(){
   const map = JSON.parse(lsGet('shinemap')||'{}');
   let html = '<div class="panel"><h3>Current data</h3>';
   html += DATA.source==='import'
-    ? '<p class="ok">Using imported data 窶・'+DATA.jobs.length+' jobs, '+DATA.quotes.length+' quotes, '+(DATA.timesheets||[]).length+' timesheet rows, '+(DATA.tips||[]).length+' tips.</p><button class="btn" id="useSample">Switch back to sample data</button>'
+    ? '<p class="ok">Using imported data — '+DATA.jobs.length+' jobs, '+DATA.quotes.length+' quotes, '+(DATA.timesheets||[]).length+' timesheet rows, '+(DATA.tips||[]).length+' tips.</p><button class="btn" id="useSample">Switch back to sample data</button>'
     : '<p class="warn">Using sample data. Import your Jobber reports below to start using real numbers.</p>';
   html += '</div>';
 
   // Jobs
-  html += '<div class="panel"><h3>1 ﾂｷ Jobs report (technician pay)</h3>'+
+  html += '<div class="panel"><h3>1 · Jobs report (technician pay)</h3>'+
     '<p class="src">Export your completed jobs from Jobber as CSV, then choose the file and map the columns.</p>'+
     '<input type="file" id="jobsFile" accept=".csv">';
   if (pendingJobs){ const h=pendingJobs.headers;
@@ -504,7 +508,7 @@ function renderData(){
   html += '</div>';
 
   // Quotes
-  html += '<div class="panel"><h3>2 ﾂｷ Quotes report (sales commission)</h3>'+
+  html += '<div class="panel"><h3>2 · Quotes report (sales commission)</h3>'+
     '<p class="src">Export the quotes report (approved quotes) from Jobber as CSV, then map the columns.</p>'+
     '<input type="file" id="quotesFile" accept=".csv">';
   if (pendingQuotes){ const h=pendingQuotes.headers;
@@ -517,7 +521,7 @@ function renderData(){
   html += '</div>';
 
   // Timesheets
-  html += '<div class="panel"><h3>3 ﾂｷ Timesheets (hours worked)</h3>'+
+  html += '<div class="panel"><h3>3 · Timesheets (hours worked)</h3>'+
     '<p class="src">Export the Jobber timesheets report as CSV, then map the columns. Hours are shown per employee per pay period (they don\'t affect commission).</p>'+
     '<input type="file" id="timesheetsFile" accept=".csv">';
   if (pendingTimesheets){ const h=pendingTimesheets.headers;
@@ -529,7 +533,7 @@ function renderData(){
   html += '</div>';
 
   // Tips (from invoices)
-  html += '<div class="panel"><h3>4 ﾂｷ Invoices 窶・tips</h3>'+
+  html += '<div class="panel"><h3>4 · Invoices — tips</h3>'+
     '<p class="src">Export paid invoices that include a tip. Tips are split evenly among the job\'s technicians and dated by the invoice-paid date.</p>'+
     '<input type="file" id="tipsFile" accept=".csv">';
   if (pendingTips){ const h=pendingTips.headers;
@@ -608,17 +612,23 @@ function renderAll(){
 // ===== pay stub + email =====
 function stubData(name){
   const p = curPeriod(), s = summary(name,p);
-  const items = s.lines.map(l=>[l.desc, l.amount]).concat(s.tipLines.map(l=>[l.desc, l.amount]));
-  if (s.bonus>0) items.push(['Bonus', s.bonus]);
-  if (!items.length) items.push(['No jobs/quotes this period', 0]);
+  const unit = s.role==='tech' ? 'Jobs completed' : 'Approved quotes';
+  const revLabel = s.role==='tech' ? 'Total job revenue' : 'Total quote value';
+  const items = [
+    [unit, s.count, 'count'],
+    [revLabel, s.revenue, 'money'],
+    ['Commission', s.commission, 'money'],
+  ];
+  if (s.tips>0) items.push(['Tips', s.tips, 'money']);
+  if (s.bonus>0) items.push(['Bonus', s.bonus, 'money']);
   return { p, s, items };
 }
 function payStub(name){
   const { p, s, items } = stubData(name);
   const revLabel = s.role==='tech' ? 'Job revenue' : 'Quote value';
   const sampleTag = DATA.source==='sample' ? ' <span class="badge">SAMPLE</span>' : '';
-  const rowsHtml = items.map(i=>'<tr><td>'+i[0]+'</td><td style="text-align:right">'+money(i[1])+'</td></tr>').join('');
-  const html = '<!doctype html><html><head><meta charset="utf-8"><title>Pay stub 窶・'+s.name+'</title><style>'+
+  const rowsHtml = items.map(i=>'<tr><td>'+i[0]+'</td><td style="text-align:right">'+(i[2]==='count'?i[1]:money(i[1]))+'</td></tr>').join('');
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>Pay stub — '+s.name+'</title><style>'+
     'body{font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;max-width:620px;margin:32px auto;padding:0 20px}'+
     'h1{font-size:20px;margin:0}.sub{color:#666;font-size:13px}.meta{margin:18px 0;font-size:13px}.meta div{margin:2px 0}'+
     'table{width:100%;border-collapse:collapse;margin-top:10px}td{padding:8px 6px;border-bottom:1px solid #eee}'+
@@ -627,8 +637,7 @@ function payStub(name){
     '.act{margin-top:22px}.act button{font-size:13px;padding:8px 12px;cursor:pointer}@media print{.act{display:none}}</style></head><body>'+
     '<h1>'+COMPANY+'</h1><div class="sub">Pay stub'+sampleTag+'</div>'+
     '<div class="meta"><div><b>Employee:</b> '+s.name+'</div><div><b>Location:</b> '+s.location+' &middot; '+(s.role==='tech'?'Technician':'Sales')+'</div>'+
-    '<div><b>Pay period:</b> '+fmt(p.start)+' 窶・'+fmt(p.end)+'</div><div><b>Payday:</b> '+fmt(p.payday)+'</div>'+
-    '<div><b>'+revLabel+':</b> '+money(s.revenue)+'</div></div>'+
+    '<div><b>Pay period:</b> '+fmt(p.start)+' – '+fmt(p.end)+'</div><div><b>Payday:</b> '+fmt(p.payday)+'</div></div>'+
     '<table><thead><tr><td><b>Description</b></td><td style="text-align:right"><b>Amount</b></td></tr></thead><tbody>'+rowsHtml+
     '</tbody><tfoot><tr><td>Total pay</td><td style="text-align:right">'+money(s.total)+'</td></tr></tfoot></table>'+
     '<div class="act"><button onclick="window.print()">Print / Save as PDF</button></div></body></html>';
@@ -663,6 +672,24 @@ $('#nav').addEventListener('click', e=>{ const b=e.target.closest('button[data-p
 $('#period').addEventListener('change', ()=>{ if(!$('#page-detail').classList.contains('hidden')) showPage(currentPage); renderAll(); });
 $('#loc').addEventListener('change', renderAll);
 $('#exportPeriod').addEventListener('click', exportPeriod);
+// Force-sync (hosted app only): request a fresh Jobber pull, then auto-reload when it lands.
+if (typeof window!=='undefined' && window.__PAYROLL_API){
+  const sb=$('#syncNow'); sb.classList.remove('hidden');
+  sb.addEventListener('click', async ()=>{
+    const m=$('#syncMsg'); sb.disabled=true; m.textContent='Requesting sync…';
+    const api=window.__PAYROLL_API, key=encodeURIComponent(window.__PAYROLL_KEY||'');
+    try{
+      const r=await fetch(api+'?action=request-sync&key='+key);
+      if(!r.ok){ m.textContent='Could not request sync.'; sb.disabled=false; return; }
+      m.textContent='Pulling fresh data from Jobber (usually 2–3 min). This page refreshes automatically when it’s ready.';
+      const before=(DATA.syncedAt||'');
+      const poll=setInterval(async ()=>{
+        try{ const jr=await fetch(api+'?format=json&key='+key); const jd=await jr.json();
+          if(jd.syncedAt && jd.syncedAt!==before){ clearInterval(poll); location.reload(); } }catch(e){}
+      }, 20000);
+    }catch(e){ m.textContent='Could not reach the sync service.'; sb.disabled=false; }
+  });
+}
 document.addEventListener('click', e=>{
   const open=e.target.closest('[data-open]'); if(open){ showPage('detail', open.dataset.open); return; }
   if(e.target.id==='backBtn'){ showPage(currentPage); return; }
@@ -687,6 +714,7 @@ document.addEventListener('change', e=>{
     renderDetail($('#page-detail h2').textContent); renderAll(); }
 });
 renderAll();
+
 }
 </script>
 </body></html>
