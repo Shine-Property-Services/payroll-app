@@ -317,12 +317,11 @@ function linesFor(name, p){
   } else {
     DATA.quotes.forEach((q,idx)=>{
       if(q.salesperson!==name || !isApprovedQuote(q.status)) return;
-      const basis = q.sent || q.approved;                 // bucket by Sent date
-      if(!basis || !inPeriod(basis,p)) return;
+      if(!q.approved || !inPeriod(q.approved,p)) return;   // commission: quotes APPROVED within the period
       const self = isSelfGen(q.leadSource), rate = self?SALES_RATE_SELFGEN:SALES_RATE;
       const computed = q.value*rate, id = 'quote:'+idx;
       const adj = getAdj(p.payday,id);
-      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(basis))+' · '+money(q.value)+(self?' · self-gen':''), src:q.leadSource,
+      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(q.approved))+' · '+money(q.value)+(self?' · self-gen':''), src:q.leadSource,
         computed, amount: adj===null?computed:adj, adjusted: adj!==null });
     });
   }
