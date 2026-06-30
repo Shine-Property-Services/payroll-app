@@ -1,0 +1,692 @@
+﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shine Payroll</title>
+<style>
+  :root{
+    --bg:#0b1220;--card:#141d2e;--card2:#1b2740;--ink:#e7ecf3;--mut:#8a98ad;
+    --good:#34d399;--accent:#60a5fa;--warn:#fbbf24;--line:#1f2b40;
+    --tech:#1baf7a;--sales:#2a78d6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px}
+  h1{font-size:21px;margin:0;font-weight:600}
+  .top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px}
+  .badge{font-size:12px;padding:3px 10px;border-radius:20px}
+  .badge.sample{background:#3a2f12;color:var(--warn)}
+  .badge.live{background:#0f3b2e;color:var(--good)}
+  nav{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+  nav button{background:none;border:none;color:var(--mut);font-size:14px;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  nav button.active{color:var(--ink);border-bottom-color:var(--accent)}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
+  label{font-size:13px;color:var(--mut)}
+  select,button.btn,input[type=number],input[type=file]{background:var(--card2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px}
+  button.btn{cursor:pointer}
+  button.btn:hover{border-color:var(--accent)}
+  input[type=number]{width:96px;text-align:right}
+  .meta{color:var(--mut);font-size:13px;margin-bottom:18px}
+  .meta b{color:var(--ink);font-weight:600}
+  .pill{display:inline-block;padding:1px 9px;border-radius:20px;font-size:12px;margin-left:6px}
+  .pill.ok{background:#0f3b2e;color:var(--good)}
+  .pill.up{background:#3a2f12;color:var(--warn)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+  .c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .c .lbl{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .c .val{font-size:25px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+  .c .val.good{color:var(--good)}
+  h3{font-size:14px;color:var(--mut);font-weight:600;margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+  .legend{display:flex;gap:18px;font-size:12px;color:var(--mut);margin-bottom:10px}
+  .dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .row .nm{width:120px;font-size:13px;color:var(--mut)}
+  .bar{height:24px;border-radius:5px;display:flex;overflow:hidden;background:var(--card)}
+  .bar span{display:block}
+  .row .amt{width:90px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:10px}
+  th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-size:14px}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  tr:last-child td{border-bottom:none}
+  tfoot td{font-weight:700;color:var(--ink);border-top:2px solid var(--line)}
+  .mk{display:inline-block;padding:1px 8px;border-radius:20px;background:var(--card2);color:var(--accent);font-size:12px}
+  .lnk{background:none;border:1px solid var(--line);color:var(--accent);border-radius:7px;padding:4px 9px;font-size:12px;cursor:pointer}
+  .lnk:hover{border-color:var(--accent)}
+  .note{color:var(--mut);font-size:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:14px;margin-top:24px}
+  .secthead{margin:26px 0 6px}
+  .secthead h3{margin:0}
+  .hidden{display:none}
+  .reset{background:none;border:none;color:var(--mut);cursor:pointer;font-size:14px}
+  .reset:hover{color:var(--accent)}
+  .detail-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .detail-head h2{font-size:18px;margin:0;font-weight:600}
+  .src{color:var(--mut);font-size:12px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+  .panel h3{margin-top:0}
+  .maprow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .maprow label{width:150px}
+  .warn{color:var(--warn);font-size:13px}
+  .ok{color:var(--good);font-size:13px}
+</style>
+</head><body>
+<div id="boot-msg" style="color:#8a98ad;font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;padding:24px">Loading live payroll data…</div>
+
+<div class="wrap">
+  <div class="top">
+    <h1>Shine Property Services 窶・Payroll</h1>
+    <span class="badge sample" id="srcBadge">Sample data</span>
+  </div>
+
+  <nav id="nav">
+    <button data-page="dashboard" class="active">Dashboard</button>
+    <button data-page="tech">Technicians</button>
+    <button data-page="sales">Sales people</button>
+    <button data-page="data">Data</button>
+  </nav>
+
+  <div class="controls" id="periodControls">
+    <label for="period">Payday</label>
+    <select id="period"></select>
+    <label for="loc" style="margin-left:6px">Location</label>
+    <select id="loc">
+      <option value="all">All locations</option>
+      <option value="Victoria">Victoria</option>
+      <option value="Prince George">Prince George</option>
+    </select>
+    <button class="btn" id="exportPeriod" style="margin-left:6px">筮・Export period CSV</button>
+  </div>
+  <div class="meta" id="meta"></div>
+
+  <section id="page-dashboard">
+    <div id="approveBar"></div>
+    <div class="grid" id="cards"></div>
+    <h3>Payroll by location</h3>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--tech)"></span>Technician pay</span>
+      <span><span class="dot" style="background:var(--sales)"></span>Sales commission</span>
+    </div>
+    <div id="compare"></div>
+  </section>
+
+  <section id="page-tech" class="hidden"></section>
+  <section id="page-sales" class="hidden"></section>
+  <section id="page-detail" class="hidden"></section>
+  <section id="page-data" class="hidden"></section>
+
+  <p class="note" id="rules"></p>
+</div>
+<script>
+(async function(){
+  var p = new URLSearchParams(location.search);
+  var key = p.get('key'); if(!key){ key = prompt('Enter payroll passcode'); }
+  var msg = document.getElementById('boot-msg');
+  try {
+    var r = await fetch('https://fxutwkandrlmtdjvydal.functions.supabase.co/payroll-board?format=json&key=' + encodeURIComponent(key||''));
+    if(!r.ok){ if(msg) msg.textContent = (r.status===401 ? 'Wrong passcode.' : 'Could not load data ('+r.status+').'); return; }
+    window.SHINE_DATA = await r.json();
+  } catch(e){ if(msg) msg.textContent = 'Could not reach the data service: ' + e; return; }
+  if(msg) msg.remove();
+  bootPayrollApp();
+})();
+function bootPayrollApp(){
+// ===== company / pay rules =====
+const COMPANY = "Shine Property Services";
+const TECH_RATE = { "Victoria": 0.20, "Prince George": 0.175 };
+const SALES_RATE = 0.10, SALES_RATE_SELFGEN = 0.20;
+const isSelfGen = ls => /self\s*gen|door\s*knock/i.test(ls || "");
+
+// ===== roster =====
+const ROSTER = {
+  tech: [
+    { name:"Caleb Mcpherson", location:"Victoria", email:"calebmcpherson4710@hotmail.com" },
+    { name:"Jared Nelson", location:"Victoria", email:"jaredpn03@gmail.com" },
+    { name:"Julian Ryan", location:"Victoria", email:"cjr094@gmail.com" },
+    { name:"Alexis Gaudreault", location:"Victoria", email:"alexis_gaudreault@outlook.com" },
+    { name:"Brayden Rougeau", location:"Prince George", email:"braydenrougeau20@gmail.com" },
+    { name:"Camerin Luxton", location:"Prince George", email:"camerinshuttleworth4@gmail.com" },
+    { name:"Chayce Vanden-Brink", location:"Prince George", email:"chaycevan18@gmail.com" },
+    { name:"Elijah Good", location:"Prince George", email:"elijahgood15@gmail.com" },
+  ],
+  sales: [
+    { name:"Jackson Powell", location:"Victoria", email:"jacksonp1372@gmail.com" },
+    { name:"Thomas Beames", location:"Victoria", email:"trbeames@hotmail.com" },
+    { name:"Eric Spies", location:"Prince George", email:"ericspies55@gmail.com" },
+  ],
+};
+const roleOf = name => ROSTER.tech.find(t=>t.name===name) ? 'tech' : 'sales';
+const memberOf = name => ROSTER.tech.find(t=>t.name===name) || ROSTER.sales.find(s=>s.name===name);
+// match an imported name to a roster name (case-insensitive, contains)
+function matchRoster(role, raw){
+  const norm = s => (s||'').toLowerCase().replace(/\s+/g,' ').trim();
+  const r = norm(raw); if(!r) return null;
+  const list = ROSTER[role];
+  let m = list.find(x=>norm(x.name)===r);
+  if(m) return m.name;
+  m = list.find(x=>r.includes(norm(x.name)) || norm(x.name).includes(r));
+  return m ? m.name : null;
+}
+const matchAny = raw => matchRoster('tech',raw) || matchRoster('sales',raw);
+
+// ===== bi-weekly period engine =====
+const DAY = 86400000;
+const ANCHOR = Date.UTC(2025, 11, 29);    // Dec 29 2025 -> pays Mon Jan 12 2026
+const TODAY = Date.now();
+function period(k){ const start=ANCHOR+k*14*DAY, end=start+13*DAY; return {k,start,end,payday:end+DAY}; }
+function fmt(ms){ return new Date(ms).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}); }
+function parse(d){ const [y,m,day]=d.split('-').map(Number); return Date.UTC(y,m-1,day); }
+const money = n => '$' + (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtH = n => (Math.round(n*100)/100).toLocaleString('en-US')+' h';
+const periods = [];
+for (let k=0;;k++){ const p=period(k); periods.push(p); if (p.start > TODAY + 60*DAY) break; }
+
+// ===== sample data (used until a real import replaces it) =====
+const SAMPLE = {
+  jobs: [
+    { closed:"2026-06-03", techs:["Caleb Mcpherson"], value:2000 },
+    { closed:"2026-06-10", techs:["Brayden Rougeau"], value:2800 },
+    { closed:"2026-06-16", techs:["Caleb Mcpherson","Julian Ryan"], value:1850 },
+    { closed:"2026-06-18", techs:["Jared Nelson"], value:2400 },
+    { closed:"2026-06-20", techs:["Julian Ryan"], value:1200 },
+    { closed:"2026-06-17", techs:["Brayden Rougeau","Elijah Good"], value:3100 },
+    { closed:"2026-06-23", techs:["Camerin Luxton"], value:1650 },
+    { closed:"2026-06-25", techs:["Jared Nelson"], value:980 },
+    { closed:"2026-06-19", techs:["Chayce Vanden-Brink"], value:2200 },
+  ],
+  quotes: [
+    { approved:"2026-06-05", salesperson:"Jackson Powell", value:6000, leadSource:"Company Marketing" },
+    { approved:"2026-06-09", salesperson:"Eric Spies", value:3300, leadSource:"Self Gen Door Knock Eric" },
+    { approved:"2026-06-16", salesperson:"Jackson Powell", value:5200, leadSource:"Self Gen Door Knock Jackson" },
+    { approved:"2026-06-19", salesperson:"Thomas Beames", value:3800, leadSource:"Thomas Lead Setter" },
+    { approved:"2026-06-22", salesperson:"Eric Spies", value:4100, leadSource:"Referral" },
+    { approved:"2026-06-24", salesperson:"Thomas Beames", value:2500, leadSource:"Self Gen Door Knock Thomas" },
+  ],
+  // timesheets: hours worked per employee (informational; pay is commission-based)
+  timesheets: [
+    { date:"2026-06-17", who:"Caleb Mcpherson", hours:38.5 }, { date:"2026-06-24", who:"Caleb Mcpherson", hours:39 },
+    { date:"2026-06-17", who:"Jared Nelson", hours:40 },      { date:"2026-06-24", who:"Jared Nelson", hours:38 },
+    { date:"2026-06-17", who:"Julian Ryan", hours:36 },       { date:"2026-06-24", who:"Julian Ryan", hours:37.5 },
+    { date:"2026-06-17", who:"Brayden Rougeau", hours:40 },   { date:"2026-06-24", who:"Brayden Rougeau", hours:41 },
+    { date:"2026-06-17", who:"Camerin Luxton", hours:35 },    { date:"2026-06-24", who:"Camerin Luxton", hours:36 },
+    { date:"2026-06-17", who:"Chayce Vanden-Brink", hours:38 },{ date:"2026-06-24", who:"Chayce Vanden-Brink", hours:39 },
+    { date:"2026-06-17", who:"Elijah Good", hours:34 },       { date:"2026-06-24", who:"Elijah Good", hours:35 },
+    { date:"2026-06-17", who:"Jackson Powell", hours:40 },    { date:"2026-06-24", who:"Jackson Powell", hours:40 },
+    { date:"2026-06-17", who:"Thomas Beames", hours:38 },     { date:"2026-06-24", who:"Thomas Beames", hours:39 },
+    { date:"2026-06-17", who:"Eric Spies", hours:40 },        { date:"2026-06-24", who:"Eric Spies", hours:38 },
+  ],
+  // tips from clients; split evenly among the job's techs; dated by the invoice-paid date
+  tips: [
+    { paidDate:"2026-06-20", techs:["Caleb Mcpherson","Julian Ryan"], amount:60 },
+    { paidDate:"2026-06-22", techs:["Jared Nelson"], amount:40 },
+    { paidDate:"2026-06-26", techs:["Brayden Rougeau","Elijah Good"], amount:50 },
+    { paidDate:"2026-06-24", techs:["Camerin Luxton"], amount:30 },
+  ],
+};
+
+// ===== safe storage (sandboxed iframes block localStorage; fall back to memory) =====
+const _mem = {};
+function lsGet(k){ try { const v=localStorage.getItem(k); return v!==null?v:(k in _mem?_mem[k]:null); } catch(e){ return (k in _mem)?_mem[k]:null; } }
+function lsSet(k,v){ _mem[k]=v; try { localStorage.setItem(k,v); } catch(e){} }
+function lsRemove(k){ delete _mem[k]; try { localStorage.removeItem(k); } catch(e){} }
+
+// ===== active data (imported or sample) =====
+let DATA = loadData();
+function normLive(d){
+  const tech = n => matchRoster('tech', n);
+  const arr = x => Array.isArray(x) ? x : (x ? [x] : []);   // PowerShell emits single-item arrays unwrapped
+  return {
+    jobs: arr(d.jobs).map(j=>({ closed:j.closed, value:+j.value||0, techs:arr(j.techs).map(tech).filter(Boolean) })).filter(j=>j.techs.length),
+    quotes: arr(d.quotes).map(q=>({ approved:q.approved, value:+q.value||0, leadSource:q.leadSource||'', salesperson:matchRoster('sales',q.salesperson) })).filter(q=>q.salesperson),
+    timesheets: arr(d.timesheets).map(t=>({ date:t.date, hours:+t.hours||0, who:matchAny(t.who) })).filter(t=>t.who),
+    tips: arr(d.tips).map(t=>({ paidDate:t.paidDate, amount:+t.amount||0, techs:arr(t.techs).map(tech).filter(Boolean) })).filter(t=>t.techs.length && t.amount>0),
+  };
+}
+function loadData(){
+  // 1) live feed written by the sync (data.js -> window.SHINE_DATA) takes precedence
+  const live = (typeof window!=='undefined') && window.SHINE_DATA;
+  if (live && (live.jobs||live.quotes||live.timesheets||live.tips)){
+    return { ...normLive(live), source:'live', syncedAt:live.syncedAt||null };
+  }
+  // 2) manual CSV import saved locally
+  try { const j = JSON.parse(lsGet('shinedata')||'null');
+    if (j && (j.jobs||j.quotes||j.timesheets||j.tips)) return { jobs:j.jobs||[], quotes:j.quotes||[], timesheets:j.timesheets||[], tips:j.tips||[], source:'import' }; } catch(e){}
+  // 3) sample
+  return { jobs:SAMPLE.jobs, quotes:SAMPLE.quotes, timesheets:SAMPLE.timesheets, tips:SAMPLE.tips, source:'sample' };
+}
+function saveData(part){
+  const cur = DATA.source==='import' ? DATA : { jobs:[], quotes:[], timesheets:[], tips:[] };
+  const merged = {
+    jobs: part.jobs!==undefined ? part.jobs : (cur.jobs||[]),
+    quotes: part.quotes!==undefined ? part.quotes : (cur.quotes||[]),
+    timesheets: part.timesheets!==undefined ? part.timesheets : (cur.timesheets||[]),
+    tips: part.tips!==undefined ? part.tips : (cur.tips||[]),
+  };
+  lsSet('shinedata', JSON.stringify(merged));
+  DATA = { ...merged, source:'import' };
+}
+function useSample(){ lsRemove('shinedata'); DATA = { jobs:SAMPLE.jobs, quotes:SAMPLE.quotes, timesheets:SAMPLE.timesheets, tips:SAMPLE.tips, source:'sample' }; }
+
+// ===== persisted: bonuses + per-line adjustments =====
+const bKey = (pd,name)=>'shinebonus:'+pd+':'+name;
+const getBonus = (pd,name)=>parseFloat(lsGet(bKey(pd,name))||'0')||0;
+const setBonus = (pd,name,v)=>lsSet(bKey(pd,name),String(v||0));
+const aKey = (pd,id)=>'shineadj:'+pd+':'+id;
+const getAdj = (pd,id)=>{const v=lsGet(aKey(pd,id));return v===null?null:(parseFloat(v)||0);};
+const setAdj = (pd,id,v)=>lsSet(aKey(pd,id),String(v));
+const clearAdj = (pd,id)=>lsRemove(aKey(pd,id));
+
+// ===== approval / finalize per pay period =====
+const apprKey = pd => 'shineapproved:'+pd;
+const isApproved = pd => !!lsGet(apprKey(pd));
+const approvedAt = pd => lsGet(apprKey(pd));
+const approvePeriod = pd => lsSet(apprKey(pd), new Date().toISOString());
+const revokePeriod = pd => lsRemove(apprKey(pd));
+
+// ===== helpers =====
+const $ = s => document.querySelector(s);
+const curPeriod = () => periods[+$('#period').value];
+const locked = () => isApproved(curPeriod().payday);
+const inPeriod = (dStr,p) => { if(!dStr) return false; const d=parse(dStr); return d>=p.start && d<=p.end; };
+const locOK = x => { const f=$('#loc').value; return f==='all'||x===f; };
+
+function linesFor(name, p){
+  const role = roleOf(name), m = memberOf(name), out = [];
+  if (role==='tech'){
+    const rate = TECH_RATE[m.location];
+    DATA.jobs.forEach((j,idx)=>{
+      if(!inPeriod(j.closed,p) || !j.techs.includes(name)) return;
+      const n = j.techs.length, base = j.value/n, computed = base*rate, id = 'job:'+idx+':'+name;
+      const adj = getAdj(p.payday,id);
+      out.push({ id, base, desc:'Job '+fmt(parse(j.closed))+' ﾂｷ '+money(j.value)+(n>1?(' ﾂｷ split '+n+' ways'):'')+' ﾂｷ '+(rate*100)+'%',
+        computed, amount: adj===null?computed:adj, adjusted: adj!==null });
+    });
+  } else {
+    DATA.quotes.forEach((q,idx)=>{
+      if(q.salesperson!==name || !inPeriod(q.approved,p)) return;
+      const self = isSelfGen(q.leadSource), rate = self?SALES_RATE_SELFGEN:SALES_RATE;
+      const computed = q.value*rate, id = 'quote:'+idx;
+      const adj = getAdj(p.payday,id);
+      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(q.approved))+' ﾂｷ '+money(q.value)+' ﾂｷ '+(self?'self-gen 20%':'10%'), src:q.leadSource,
+        computed, amount: adj===null?computed:adj, adjusted: adj!==null });
+    });
+  }
+  return out;
+}
+function hoursFor(name, p){
+  return (DATA.timesheets||[]).filter(t=>t.who===name && inPeriod(t.date,p)).reduce((a,t)=>a+(Number(t.hours)||0),0);
+}
+function tipLinesFor(name, p){
+  if (roleOf(name)!=='tech') return [];
+  const out=[];
+  (DATA.tips||[]).forEach((t,idx)=>{
+    if(!inPeriod(t.paidDate,p) || !(t.techs||[]).includes(name)) return;
+    const n=t.techs.length, computed=t.amount/n, id='tip:'+idx+':'+name;
+    const adj=getAdj(p.payday,id);
+    out.push({ id, base:t.amount/n, desc:'Tip ﾂｷ invoice paid '+fmt(parse(t.paidDate))+' ﾂｷ '+money(t.amount)+(n>1?(' ﾂｷ split '+n+' ways'):''),
+      computed, amount: adj===null?computed:adj, adjusted: adj!==null });
+  });
+  return out;
+}
+function summary(name, p){
+  const lines = linesFor(name,p);
+  const commission = lines.reduce((a,l)=>a+l.amount,0);
+  const revenue = lines.reduce((a,l)=>a+l.base,0);
+  const tipLines = tipLinesFor(name,p);
+  const tips = tipLines.reduce((a,l)=>a+l.amount,0);
+  const bonus = getBonus(p.payday,name);
+  const hours = hoursFor(name,p);
+  return { name, role:roleOf(name), location:memberOf(name).location, lines, count:lines.length, hours, revenue, commission, tipLines, tips, bonus, total:commission+tips+bonus };
+}
+
+// ===== period dropdown =====
+const sel = $('#period');
+let defaultIdx = 0;
+periods.forEach((p,i)=>{
+  const avail = p.payday<=TODAY;
+  const o = document.createElement('option'); o.value=i;
+  o.textContent = fmt(p.payday)+(avail?'':'  (upcoming)');
+  sel.appendChild(o); if (avail) defaultIdx=i;
+});
+sel.value = defaultIdx;
+let currentPage = 'dashboard';
+
+// ===== renderers =====
+function renderBadge(){
+  const b = $('#srcBadge');
+  if (DATA.source==='live'){ b.className='badge live'; b.textContent='Live from Jobber'+(DATA.syncedAt?(' ﾂｷ synced '+DATA.syncedAt):''); }
+  else if (DATA.source==='import'){ b.className='badge live'; b.textContent='Imported ﾂｷ '+DATA.jobs.length+' jobs, '+DATA.quotes.length+' quotes'; }
+  else { b.className='badge sample'; b.textContent='Sample data'; }
+}
+function renderMeta(){
+  const p = curPeriod(), avail = p.payday<=TODAY;
+  $('#meta').innerHTML = 'Pay period <b>'+fmt(p.start)+' 窶・'+fmt(p.end)+'</b> ﾂｷ Payday <b>'+fmt(p.payday)+'</b>'+
+    (avail?'<span class="pill ok">Report available</span>':'<span class="pill up">Upcoming</span>');
+}
+function renderDashboard(){
+  const p = curPeriod();
+  const techs = ROSTER.tech.filter(t=>locOK(t.location)).map(t=>summary(t.name,p));
+  const reps  = ROSTER.sales.filter(s=>locOK(s.location)).map(s=>summary(s.name,p));
+  const techPay = techs.reduce((a,t)=>a+t.commission,0);
+  const salesComm = reps.reduce((a,s)=>a+s.commission,0);
+  const tipsTotal = techs.reduce((a,t)=>a+t.tips,0);
+  const bonuses = [...techs,...reps].reduce((a,x)=>a+x.bonus,0);
+  const hrs = [...techs,...reps].reduce((a,x)=>a+x.hours,0);
+  const people = [...techs,...reps].filter(x=>x.total>0).length;
+  $('#cards').innerHTML = [
+    ['Total payroll', money(techPay+salesComm+tipsTotal+bonuses), 'good'],
+    ['Technician pay', money(techPay), ''],
+    ['Sales commission', money(salesComm), ''],
+    ['Tips', money(tipsTotal), ''],
+    ['Bonuses', money(bonuses), ''],
+    ['Total hours', fmtH(hrs), ''],
+    ['People paid', String(people), ''],
+  ].map(c=>'<div class="c"><div class="lbl">'+c[0]+'</div><div class="val '+c[2]+'">'+c[1]+'</div></div>').join('');
+  const lt = {};
+  ["Victoria","Prince George"].forEach(L=>{
+    const t = ROSTER.tech.filter(x=>x.location===L).reduce((a,x)=>{const z=summary(x.name,p);return a+z.commission+z.tips;},0);
+    const s = ROSTER.sales.filter(x=>x.location===L).reduce((a,x)=>a+summary(x.name,p).commission,0);
+    lt[L]={t,s};
+  });
+  const max = Math.max(lt.Victoria.t+lt.Victoria.s, lt["Prince George"].t+lt["Prince George"].s, 1);
+  $('#compare').innerHTML = ["Victoria","Prince George"].map(L=>{
+    const t=lt[L].t, s=lt[L].s, sum=t+s;
+    return '<div class="row"><span class="nm">'+L+'</span><div class="bar" style="width:'+(sum/max*100)+'%">'+
+      '<span style="width:'+(sum?t/sum*100:0)+'%;background:var(--tech)"></span>'+
+      '<span style="width:'+(sum?s/sum*100:0)+'%;background:var(--sales)"></span></div>'+
+      '<span class="amt">'+money(sum)+'</span></div>';
+  }).join('');
+}
+function roleTable(role){
+  const p = curPeriod();
+  const groups = ["Victoria","Prince George"].filter(L=>$('#loc').value==='all'||$('#loc').value===L);
+  let html='';
+  groups.forEach(L=>{
+    const rows = ROSTER[role].filter(x=>x.location===L).map(x=>summary(x.name,p));
+    let sub=0, subH=0, subTip=0;
+    const isTech = role==='tech';
+    const cap = isTech ? (L+' technicians ﾂｷ '+(TECH_RATE[L]*100)+'% of job value')
+                       : (L+' sales ﾂｷ 10% per quote, 20% self-generated');
+    html += '<div class="secthead"><h3>'+cap+'</h3></div>';
+    html += '<table><thead><tr><th>'+(isTech?'Technician':'Salesperson')+'</th><th>'+(isTech?'Jobs':'Quotes')+'</th><th>Hours</th><th>Commission</th>'+(isTech?'<th>Tips</th>':'')+'<th>Bonus</th><th>Total</th><th></th></tr></thead><tbody>';
+    rows.forEach(r=>{ sub+=r.total; subH+=r.hours; subTip+=r.tips;
+      html += '<tr><td>'+r.name+'</td><td>'+r.count+'</td><td>'+fmtH(r.hours)+'</td><td>'+money(r.commission)+'</td>'+
+        (isTech?('<td>'+money(r.tips)+'</td>'):'')+
+        '<td><input type="number" min="0" step="50" value="'+r.bonus+'" data-bonus="'+r.name+'"'+(locked()?' disabled':'')+'></td>'+
+        '<td>'+money(r.total)+'</td><td><button class="lnk" data-open="'+r.name+'">Open</button></td></tr>';
+    });
+    html += '</tbody><tfoot><tr><td>'+L+' total</td><td></td><td>'+fmtH(subH)+'</td><td></td>'+(isTech?('<td>'+money(subTip)+'</td>'):'')+'<td></td><td>'+money(sub)+'</td><td></td></tr></tfoot></table>';
+  });
+  $('#page-'+role).innerHTML = html;
+}
+function renderDetail(name){
+  const p = curPeriod(), s = summary(name,p), lk = locked();
+  const revLabel = s.role==='tech' ? 'Job revenue' : 'Quote value';
+  const mkRow = l => '<tr><td>'+l.desc+(l.src?'<div class="src">Lead source: '+l.src+'</div>':'')+'</td>'+
+    '<td>'+money(l.computed)+'</td>'+
+    '<td><input type="number" step="10" value="'+(Math.round(l.amount*100)/100)+'" data-adj="'+l.id+'"'+(lk?' disabled':'')+'>'+
+    (l.adjusted&&!lk?' <button class="reset" title="Reset to calculated" data-reset="'+l.id+'">竊ｺ</button>':'')+'</td></tr>';
+  let rows = (s.lines.map(mkRow).join('') + s.tipLines.map(mkRow).join('')) || '<tr><td colspan="3" style="color:var(--mut)">No jobs/quotes in this period.</td></tr>';
+  $('#page-detail').innerHTML =
+    '<div class="detail-head"><button class="lnk" id="backBtn">竊・Back</button>'+
+    '<h2>'+name+'</h2><span class="mk">'+s.location+'</span><span class="src">'+(s.role==='tech'?'Technician':'Sales')+' ﾂｷ '+memberOf(name).email+' ﾂｷ '+fmt(p.start)+' 窶・'+fmt(p.end)+' ﾂｷ payday '+fmt(p.payday)+(lk?' ﾂｷ approved/locked':'')+'</span></div>'+
+    '<table><thead><tr><th>Line item</th><th>Calculated</th><th>Adjusted</th></tr></thead><tbody>'+rows+'</tbody>'+
+    '<tfoot>'+
+    '<tr><td>Hours worked</td><td></td><td style="text-align:right">'+fmtH(s.hours)+'</td></tr>'+
+    '<tr><td>'+revLabel+'</td><td></td><td style="text-align:right">'+money(s.revenue)+'</td></tr>'+
+    '<tr><td>Commission</td><td></td><td style="text-align:right">'+money(s.commission)+'</td></tr>'+
+    (s.tipLines.length?'<tr><td>Tips</td><td></td><td style="text-align:right">'+money(s.tips)+'</td></tr>':'')+
+    '<tr><td>Bonus</td><td></td><td style="text-align:right"><input type="number" min="0" step="50" value="'+s.bonus+'" data-bonus="'+name+'"'+(lk?' disabled':'')+'></td></tr>'+
+    '<tr><td>Total pay</td><td></td><td style="text-align:right">'+money(s.total)+'</td></tr></tfoot></table>'+
+    '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">'+
+    '<button class="btn" data-stub="'+name+'">Pay stub (PDF)</button></div>';
+}
+function renderApprove(){
+  const p = curPeriod(), pd = p.payday;
+  if (isApproved(pd)){
+    const when = new Date(approvedAt(pd)).toLocaleString('en-CA');
+    $('#approveBar').innerHTML =
+      '<div class="panel" style="border-color:var(--good)"><b style="color:var(--good)">笨・Payroll approved</b> for payday '+fmt(pd)+
+      ' &middot; <span class="src">approved '+when+' 窶・bonuses &amp; adjustments are locked</span>'+
+      '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'+
+      '<button class="btn" id="revokeBtn">Revoke / unlock</button></div></div>';
+  } else {
+    $('#approveBar').innerHTML =
+      '<div class="panel">Review the numbers below, then approve to finalize this pay period and lock edits.'+
+      '<div style="margin-top:10px"><button class="btn" id="approveBtn">Approve payroll for payday '+fmt(pd)+'</button></div></div>';
+  }
+}
+function renderRules(){
+  $('#rules').innerHTML = 'Pay rules 窶・Technicians: <b>20%</b> (Victoria) / <b>17.5%</b> (Prince George) of total job revenue, by scheduled date; '+
+    'jobs with 2+ assigned techs split evenly. Sales: <b>10%</b> per approved quote (by approved date), <b>20%</b> when Lead Source is self-gen / door knock. '+
+    'Any line item can be hand-adjusted; bonuses add to the total.';
+}
+
+// ===== Data / import page =====
+let pendingJobs = null, pendingQuotes = null, pendingTimesheets = null, pendingTips = null; // {headers, rows}
+function parseCSV(text){
+  const rows=[]; let i=0, field='', row=[], q=false;
+  while(i<text.length){ const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; } else field+=c; }
+    else { if(c==='"') q=true; else if(c===','){ row.push(field); field=''; }
+      else if(c==='\r'){} else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else field+=c; }
+    i++; }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.some(c=>String(c).trim()!==''));
+}
+function toObjects(csv){ const headers=csv[0].map(h=>h.trim()); return { headers, rows: csv.slice(1).map(r=>{const o={}; headers.forEach((h,i)=>o[h]=(r[i]||'').trim()); return o;}) }; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function toYMD(s){ s=(s||'').trim(); if(!s) return null;
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m) return m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/); if(m){let y=+m[3]; if(y<100)y+=2000; return y+'-'+pad(+m[1])+'-'+pad(+m[2]);}
+  const d=new Date(s); if(!isNaN(d.getTime())) return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  return null;
+}
+const toNum = v => parseFloat(String(v).replace(/[^0-9.\-]/g,''))||0;
+const splitNames = v => String(v).split(/[,;&\/]|\band\b/i).map(x=>x.trim()).filter(Boolean);
+function guess(headers, keys){ const h=headers.find(x=>keys.some(k=>x.toLowerCase().includes(k))); return h||headers[0]; }
+function opts(headers, selected){ return headers.map(h=>'<option'+(h===selected?' selected':'')+'>'+h+'</option>').join(''); }
+
+function renderData(){
+  const map = JSON.parse(lsGet('shinemap')||'{}');
+  let html = '<div class="panel"><h3>Current data</h3>';
+  html += DATA.source==='import'
+    ? '<p class="ok">Using imported data 窶・'+DATA.jobs.length+' jobs, '+DATA.quotes.length+' quotes, '+(DATA.timesheets||[]).length+' timesheet rows, '+(DATA.tips||[]).length+' tips.</p><button class="btn" id="useSample">Switch back to sample data</button>'
+    : '<p class="warn">Using sample data. Import your Jobber reports below to start using real numbers.</p>';
+  html += '</div>';
+
+  // Jobs
+  html += '<div class="panel"><h3>1 ﾂｷ Jobs report (technician pay)</h3>'+
+    '<p class="src">Export your completed jobs from Jobber as CSV, then choose the file and map the columns.</p>'+
+    '<input type="file" id="jobsFile" accept=".csv">';
+  if (pendingJobs){ const h=pendingJobs.headers;
+    html += '<div class="maprow"><label>Technician(s)</label><select id="mJobTech">'+opts(h,map.jobTech||guess(h,['tech','assigned','team','staff','employee']))+'</select></div>'+
+      '<div class="maprow"><label>Job revenue (total)</label><select id="mJobVal">'+opts(h,map.jobVal||guess(h,['total','revenue','amount','value','price']))+'</select></div>'+
+      '<div class="maprow"><label>Date closed</label><select id="mJobDate">'+opts(h,map.jobDate||guess(h,['close','complete','finished','date']))+'</select></div>'+
+      '<button class="btn" id="applyJobs">Load '+pendingJobs.rows.length+' job rows</button>';
+  }
+  html += '</div>';
+
+  // Quotes
+  html += '<div class="panel"><h3>2 ﾂｷ Quotes report (sales commission)</h3>'+
+    '<p class="src">Export the quotes report (approved quotes) from Jobber as CSV, then map the columns.</p>'+
+    '<input type="file" id="quotesFile" accept=".csv">';
+  if (pendingQuotes){ const h=pendingQuotes.headers;
+    html += '<div class="maprow"><label>Salesperson</label><select id="mQSales">'+opts(h,map.qSales||guess(h,['salesperson','sales rep','rep','sold by','user','owner']))+'</select></div>'+
+      '<div class="maprow"><label>Approved date</label><select id="mQDate">'+opts(h,map.qDate||guess(h,['approv','accepted','converted','date']))+'</select></div>'+
+      '<div class="maprow"><label>Quote value (total)</label><select id="mQVal">'+opts(h,map.qVal||guess(h,['total','amount','value','price']))+'</select></div>'+
+      '<div class="maprow"><label>Lead source</label><select id="mQLead">'+opts(h,map.qLead||guess(h,['lead source','lead','source']))+'</select></div>'+
+      '<button class="btn" id="applyQuotes">Load '+pendingQuotes.rows.length+' quote rows</button>';
+  }
+  html += '</div>';
+
+  // Timesheets
+  html += '<div class="panel"><h3>3 ﾂｷ Timesheets (hours worked)</h3>'+
+    '<p class="src">Export the Jobber timesheets report as CSV, then map the columns. Hours are shown per employee per pay period (they don\'t affect commission).</p>'+
+    '<input type="file" id="timesheetsFile" accept=".csv">';
+  if (pendingTimesheets){ const h=pendingTimesheets.headers;
+    html += '<div class="maprow"><label>Employee</label><select id="mTName">'+opts(h,map.tName||guess(h,['employee','user','staff','name','tech','worker']))+'</select></div>'+
+      '<div class="maprow"><label>Date</label><select id="mTDate">'+opts(h,map.tDate||guess(h,['date','day','worked','start']))+'</select></div>'+
+      '<div class="maprow"><label>Hours</label><select id="mTHours">'+opts(h,map.tHours||guess(h,['hour','duration','time','total']))+'</select></div>'+
+      '<button class="btn" id="applyTimesheets">Load '+pendingTimesheets.rows.length+' timesheet rows</button>';
+  }
+  html += '</div>';
+
+  // Tips (from invoices)
+  html += '<div class="panel"><h3>4 ﾂｷ Invoices 窶・tips</h3>'+
+    '<p class="src">Export paid invoices that include a tip. Tips are split evenly among the job\'s technicians and dated by the invoice-paid date.</p>'+
+    '<input type="file" id="tipsFile" accept=".csv">';
+  if (pendingTips){ const h=pendingTips.headers;
+    html += '<div class="maprow"><label>Technician(s)</label><select id="mTipTech">'+opts(h,map.tipTech||guess(h,['tech','assigned','team','staff','employee']))+'</select></div>'+
+      '<div class="maprow"><label>Tip amount</label><select id="mTipAmt">'+opts(h,map.tipAmt||guess(h,['tip','gratuity']))+'</select></div>'+
+      '<div class="maprow"><label>Invoice paid date</label><select id="mTipDate">'+opts(h,map.tipDate||guess(h,['paid','payment','received','date']))+'</select></div>'+
+      '<button class="btn" id="applyTips">Load '+pendingTips.rows.length+' invoice rows</button>';
+  }
+  html += '</div><div id="importMsg"></div>';
+  $('#page-data').innerHTML = html;
+}
+function readFile(input, cb){ const f=input.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>cb(toObjects(parseCSV(r.result))); r.readAsText(f); }
+function applyJobs(){
+  const map = JSON.parse(lsGet('shinemap')||'{}');
+  map.jobTech=$('#mJobTech').value; map.jobVal=$('#mJobVal').value; map.jobDate=$('#mJobDate').value;
+  lsSet('shinemap', JSON.stringify(map));
+  const unmatched=new Set(); const jobs=[];
+  pendingJobs.rows.forEach(r=>{
+    const closed=toYMD(r[map.jobDate]); const value=toNum(r[map.jobVal]);
+    const techs=splitNames(r[map.jobTech]).map(n=>{const mr=matchRoster('tech',n); if(!mr) unmatched.add(n); return mr;}).filter(Boolean);
+    if(closed && techs.length) jobs.push({closed, techs, value});
+  });
+  saveData({jobs});
+  pendingJobs=null; afterImport('Loaded '+jobs.length+' jobs.', unmatched, 'technician');
+}
+function applyQuotes(){
+  const map = JSON.parse(lsGet('shinemap')||'{}');
+  map.qSales=$('#mQSales').value; map.qDate=$('#mQDate').value; map.qVal=$('#mQVal').value; map.qLead=$('#mQLead').value;
+  lsSet('shinemap', JSON.stringify(map));
+  const unmatched=new Set(); const quotes=[];
+  pendingQuotes.rows.forEach(r=>{
+    const approved=toYMD(r[map.qDate]); const value=toNum(r[map.qVal]);
+    const sp=matchRoster('sales', r[map.qSales]); if(r[map.qSales] && !sp) unmatched.add(r[map.qSales]);
+    if(approved && sp) quotes.push({approved, salesperson:sp, value, leadSource:r[map.qLead]||''});
+  });
+  saveData({quotes});
+  pendingQuotes=null; afterImport('Loaded '+quotes.length+' quotes.', unmatched, 'salesperson');
+}
+function applyTimesheets(){
+  const map = JSON.parse(lsGet('shinemap')||'{}');
+  map.tName=$('#mTName').value; map.tDate=$('#mTDate').value; map.tHours=$('#mTHours').value;
+  lsSet('shinemap', JSON.stringify(map));
+  const unmatched=new Set(); const timesheets=[];
+  pendingTimesheets.rows.forEach(r=>{
+    const date=toYMD(r[map.tDate]); const hours=toNum(r[map.tHours]);
+    const who=matchAny(r[map.tName]); if(r[map.tName] && !who) unmatched.add(r[map.tName]);
+    if(date && who) timesheets.push({date, who, hours});
+  });
+  saveData({timesheets});
+  pendingTimesheets=null; afterImport('Loaded '+timesheets.length+' timesheet rows.', unmatched, 'employee');
+}
+function applyTips(){
+  const map = JSON.parse(lsGet('shinemap')||'{}');
+  map.tipTech=$('#mTipTech').value; map.tipAmt=$('#mTipAmt').value; map.tipDate=$('#mTipDate').value;
+  lsSet('shinemap', JSON.stringify(map));
+  const unmatched=new Set(); const tips=[];
+  pendingTips.rows.forEach(r=>{
+    const paidDate=toYMD(r[map.tipDate]); const amount=toNum(r[map.tipAmt]);
+    const techs=splitNames(r[map.tipTech]).map(n=>{const mr=matchRoster('tech',n); if(!mr) unmatched.add(n); return mr;}).filter(Boolean);
+    if(paidDate && amount>0 && techs.length) tips.push({paidDate, techs, amount});
+  });
+  saveData({tips});
+  pendingTips=null; afterImport('Loaded '+tips.length+' tip rows.', unmatched, 'technician');
+}
+function afterImport(msg, unmatched, kind){
+  renderBadge(); renderData(); renderAll();
+  let m='<p class="ok">'+msg+'</p>';
+  if(unmatched.size) m+='<p class="warn">Not matched to a '+kind+' on the roster (ignored): '+[...unmatched].join(', ')+'. Check the spelling against the roster.</p>';
+  const box=$('#importMsg'); if(box) box.innerHTML=m;
+}
+
+function renderAll(){
+  renderBadge(); renderMeta(); renderApprove(); renderDashboard(); roleTable('tech'); roleTable('sales'); renderRules();
+}
+
+// ===== pay stub + email =====
+function stubData(name){
+  const p = curPeriod(), s = summary(name,p);
+  const items = s.lines.map(l=>[l.desc, l.amount]).concat(s.tipLines.map(l=>[l.desc, l.amount]));
+  if (s.bonus>0) items.push(['Bonus', s.bonus]);
+  if (!items.length) items.push(['No jobs/quotes this period', 0]);
+  return { p, s, items };
+}
+function payStub(name){
+  const { p, s, items } = stubData(name);
+  const revLabel = s.role==='tech' ? 'Job revenue' : 'Quote value';
+  const sampleTag = DATA.source==='sample' ? ' <span class="badge">SAMPLE</span>' : '';
+  const rowsHtml = items.map(i=>'<tr><td>'+i[0]+'</td><td style="text-align:right">'+money(i[1])+'</td></tr>').join('');
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>Pay stub 窶・'+s.name+'</title><style>'+
+    'body{font:14px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;max-width:620px;margin:32px auto;padding:0 20px}'+
+    'h1{font-size:20px;margin:0}.sub{color:#666;font-size:13px}.meta{margin:18px 0;font-size:13px}.meta div{margin:2px 0}'+
+    'table{width:100%;border-collapse:collapse;margin-top:10px}td{padding:8px 6px;border-bottom:1px solid #eee}'+
+    'tfoot td{font-weight:700;border-top:2px solid #333;border-bottom:none;font-size:16px}'+
+    '.badge{background:#fbe8b0;color:#7a5b00;font-size:11px;padding:2px 8px;border-radius:10px}'+
+    '.act{margin-top:22px}.act button{font-size:13px;padding:8px 12px;cursor:pointer}@media print{.act{display:none}}</style></head><body>'+
+    '<h1>'+COMPANY+'</h1><div class="sub">Pay stub'+sampleTag+'</div>'+
+    '<div class="meta"><div><b>Employee:</b> '+s.name+'</div><div><b>Location:</b> '+s.location+' &middot; '+(s.role==='tech'?'Technician':'Sales')+'</div>'+
+    '<div><b>Pay period:</b> '+fmt(p.start)+' 窶・'+fmt(p.end)+'</div><div><b>Payday:</b> '+fmt(p.payday)+'</div>'+
+    '<div><b>'+revLabel+':</b> '+money(s.revenue)+'</div></div>'+
+    '<table><thead><tr><td><b>Description</b></td><td style="text-align:right"><b>Amount</b></td></tr></thead><tbody>'+rowsHtml+
+    '</tbody><tfoot><tr><td>Total pay</td><td style="text-align:right">'+money(s.total)+'</td></tr></tfoot></table>'+
+    '<div class="act"><button onclick="window.print()">Print / Save as PDF</button></div></body></html>';
+  const w = window.open('','_blank'); w.document.write(html); w.document.close();
+}
+// ===== period CSV =====
+function exportPeriod(){
+  const p = curPeriod();
+  const rows = [['Role','Name','Location','Items','Hours','JobOrQuoteRevenue','Commission','Tips','Bonus','Total']];
+  ['tech','sales'].forEach(role=>ROSTER[role].filter(x=>locOK(x.location)).forEach(x=>{
+    const s=summary(x.name,p);
+    rows.push([role==='tech'?'Technician':'Sales',x.name,x.location,s.count,s.hours,s.revenue.toFixed(2),s.commission.toFixed(2),s.tips.toFixed(2),s.bonus.toFixed(2),s.total.toFixed(2)]);
+  }));
+  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'shine-payroll_'+fmt(p.payday).replace(/[ ,]/g,'')+'.csv'; a.click();
+}
+
+// ===== page switching =====
+function showPage(pg, name){
+  ['dashboard','tech','sales','detail','data'].forEach(x=>$('#page-'+x).classList.toggle('hidden', x!==pg));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.page===pg));
+  $('#periodControls').classList.toggle('hidden', pg==='data');
+  if (pg==='detail') renderDetail(name);
+  else if (pg==='data') renderData();
+  else currentPage = pg;
+}
+
+// ===== events =====
+$('#nav').addEventListener('click', e=>{ const b=e.target.closest('button[data-page]'); if(b) showPage(b.dataset.page); });
+$('#period').addEventListener('change', ()=>{ if(!$('#page-detail').classList.contains('hidden')) showPage(currentPage); renderAll(); });
+$('#loc').addEventListener('change', renderAll);
+$('#exportPeriod').addEventListener('click', exportPeriod);
+document.addEventListener('click', e=>{
+  const open=e.target.closest('[data-open]'); if(open){ showPage('detail', open.dataset.open); return; }
+  if(e.target.id==='backBtn'){ showPage(currentPage); return; }
+  const stub=e.target.closest('[data-stub]'); if(stub){ payStub(stub.dataset.stub); return; }
+  const rst=e.target.closest('[data-reset]'); if(rst){ clearAdj(curPeriod().payday, rst.dataset.reset); renderDetail($('#page-detail h2').textContent); renderAll(); return; }
+  if(e.target.id==='applyJobs'){ applyJobs(); return; }
+  if(e.target.id==='applyQuotes'){ applyQuotes(); return; }
+  if(e.target.id==='applyTimesheets'){ applyTimesheets(); return; }
+  if(e.target.id==='applyTips'){ applyTips(); return; }
+  if(e.target.id==='useSample'){ useSample(); renderData(); renderAll(); return; }
+  if(e.target.id==='approveBtn'){ if(confirm('Approve payroll for payday '+fmt(curPeriod().payday)+'? This locks bonuses and adjustments for the period.')){ approvePeriod(curPeriod().payday); renderAll(); } return; }
+  if(e.target.id==='revokeBtn'){ if(confirm('Revoke approval and unlock editing for this period?')){ revokePeriod(curPeriod().payday); renderAll(); } return; }
+});
+document.addEventListener('change', e=>{
+  if(e.target.id==='jobsFile'){ readFile(e.target, o=>{ pendingJobs=o; renderData(); }); return; }
+  if(e.target.id==='quotesFile'){ readFile(e.target, o=>{ pendingQuotes=o; renderData(); }); return; }
+  if(e.target.id==='timesheetsFile'){ readFile(e.target, o=>{ pendingTimesheets=o; renderData(); }); return; }
+  if(e.target.id==='tipsFile'){ readFile(e.target, o=>{ pendingTips=o; renderData(); }); return; }
+  if(e.target.matches('input[data-bonus]')){ setBonus(curPeriod().payday, e.target.dataset.bonus, parseFloat(e.target.value)||0);
+    const open=!$('#page-detail').classList.contains('hidden'); renderAll(); if(open) renderDetail(e.target.dataset.bonus); }
+  if(e.target.matches('input[data-adj]')){ setAdj(curPeriod().payday, e.target.dataset.adj, parseFloat(e.target.value)||0);
+    renderDetail($('#page-detail h2').textContent); renderAll(); }
+});
+renderAll();
+}
+</script>
+</body></html>
