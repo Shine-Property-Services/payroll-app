@@ -195,14 +195,14 @@ const SAMPLE = {
     { closed:"2026-06-19", techs:["Chayce Vanden-Brink"], value:2200 },
   ],
   quotes: [
-    { approved:"2026-06-05", created:"2026-06-02", status:"approved", salesperson:"Jackson Powell", value:6000, leadSource:"Company Marketing" },
-    { approved:"2026-06-09", created:"2026-06-06", status:"converted", salesperson:"Eric Spies", value:3300, leadSource:"Self Gen Door Knock Eric" },
-    { approved:"2026-06-16", created:"2026-06-12", status:"approved", salesperson:"Jackson Powell", value:5200, leadSource:"Self Gen Door Knock Jackson" },
-    { approved:"2026-06-19", created:"2026-06-17", status:"approved", salesperson:"Thomas Beames", value:3800, leadSource:"Thomas Lead Setter" },
-    { approved:"2026-06-22", created:"2026-06-20", status:"converted", salesperson:"Eric Spies", value:4100, leadSource:"Referral" },
-    { approved:"2026-06-24", created:"2026-06-21", status:"approved", salesperson:"Thomas Beames", value:2500, leadSource:"Self Gen Door Knock Thomas" },
-    { approved:"", created:"2026-06-18", status:"awaiting_response", salesperson:"Thomas Beames", value:1500, leadSource:"Facebook" },
-    { approved:"", created:"2026-06-23", status:"draft", salesperson:"Thomas Beames", value:900, leadSource:"Website" },
+    { approved:"2026-06-05", created:"2026-06-02", sent:"2026-06-04", status:"approved", salesperson:"Jackson Powell", value:6000, leadSource:"Company Marketing" },
+    { approved:"2026-06-09", created:"2026-06-06", sent:"2026-06-07", status:"converted", salesperson:"Eric Spies", value:3300, leadSource:"Self Gen Door Knock Eric" },
+    { approved:"2026-06-16", created:"2026-06-12", sent:"2026-06-15", status:"approved", salesperson:"Jackson Powell", value:5200, leadSource:"Self Gen Door Knock Jackson" },
+    { approved:"2026-06-19", created:"2026-06-17", sent:"2026-06-17", status:"approved", salesperson:"Thomas Beames", value:3800, leadSource:"Thomas Lead Setter" },
+    { approved:"2026-06-22", created:"2026-06-20", sent:"2026-06-21", status:"converted", salesperson:"Eric Spies", value:4100, leadSource:"Referral" },
+    { approved:"2026-06-24", created:"2026-06-21", sent:"2026-06-22", status:"approved", salesperson:"Thomas Beames", value:2500, leadSource:"Self Gen Door Knock Thomas" },
+    { approved:"", created:"2026-06-18", sent:"2026-06-18", status:"awaiting_response", salesperson:"Thomas Beames", value:1500, leadSource:"Facebook" },
+    { approved:"", created:"2026-06-23", sent:"", status:"draft", salesperson:"Thomas Beames", value:900, leadSource:"Website" },
   ],
   // timesheets: hours worked per employee (informational; pay is commission-based)
   timesheets: [
@@ -239,7 +239,7 @@ function normLive(d){
   const arr = x => Array.isArray(x) ? x : (x ? [x] : []);   // PowerShell emits single-item arrays unwrapped
   return {
     jobs: arr(d.jobs).map(j=>({ closed:j.closed, value:+j.value||0, techs:arr(j.techs).map(tech).filter(Boolean) })).filter(j=>j.techs.length),
-    quotes: arr(d.quotes).map(q=>({ approved:q.approved, created:q.created||q.approved, status:q.status||'', value:+q.value||0, leadSource:q.leadSource||'', salesperson:matchRoster('sales',q.salesperson) })).filter(q=>q.salesperson),
+    quotes: arr(d.quotes).map(q=>({ approved:q.approved, created:q.created||q.approved, sent:q.sent||'', status:q.status||'', value:+q.value||0, leadSource:q.leadSource||'', salesperson:matchRoster('sales',q.salesperson) })).filter(q=>q.salesperson),
     timesheets: arr(d.timesheets).map(t=>({ date:t.date, hours:+t.hours||0, who:matchAny(t.who) })).filter(t=>t.who),
     tips: arr(d.tips).map(t=>({ paidDate:t.paidDate, amount:+t.amount||0, techs:arr(t.techs).map(tech).filter(Boolean) })).filter(t=>t.techs.length && t.amount>0),
   };
@@ -293,7 +293,7 @@ const inPeriod = (dStr,p) => { if(!dStr) return false; const d=parse(dStr); retu
 const locOK = x => { const f=$('#loc').value; return f==='all'||x===f; };
 
 const isApprovedQuote = st => !st || /approv|convert/i.test(st);   // counts toward % commission
-function leadsFor(name, p){ return (DATA.quotes||[]).filter(q=> q.salesperson===name && inPeriod(q.created||q.approved, p)); }
+function leadsFor(name, p){ return (DATA.quotes||[]).filter(q=> q.salesperson===name && q.sent && inPeriod(q.sent, p)); }   // quotes SENT in the period
 function linesFor(name, p){
   const role = roleOf(name), m = memberOf(name), out = [];
   if (m.pay && m.pay.type==='hourlyLeads'){
@@ -316,11 +316,13 @@ function linesFor(name, p){
     });
   } else {
     DATA.quotes.forEach((q,idx)=>{
-      if(q.salesperson!==name || !inPeriod(q.approved,p) || !isApprovedQuote(q.status)) return;
+      if(q.salesperson!==name || !isApprovedQuote(q.status)) return;
+      const basis = q.sent || q.approved;                 // bucket by Sent date
+      if(!basis || !inPeriod(basis,p)) return;
       const self = isSelfGen(q.leadSource), rate = self?SALES_RATE_SELFGEN:SALES_RATE;
       const computed = q.value*rate, id = 'quote:'+idx;
       const adj = getAdj(p.payday,id);
-      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(q.approved))+' · '+money(q.value)+(self?' · self-gen':''), src:q.leadSource,
+      out.push({ id, base:q.value, desc:'Quote '+fmt(parse(basis))+' · '+money(q.value)+(self?' · self-gen':''), src:q.leadSource,
         computed, amount: adj===null?computed:adj, adjusted: adj!==null });
     });
   }
